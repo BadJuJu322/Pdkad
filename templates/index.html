@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Explorer</title>
+    <style>
+        .path-nav { margin-bottom: 20px; }
+        .dir { color: blue; }
+        .file { color: green; }
+    </style>
+</head>
+<body>
+    <h1>File Explorer: {{ current_path }}</h1>
+    
+    <div class="path-nav">
+        <a href="{{ url_for('explore.index') }}">Root</a>
+        {% for part in current_path.split('/') if part %}
+            / <a href="{{ url_for('explore.index', subpath=part) }}">{{ part }}</a>
+        {% endfor %}
+    </div>
+
+    <h2>Create Folder</h2>
+    <form method="POST" action="{{ url_for('explore.mkdir') }}">
+        <input type="hidden" name="current_path" value="{{ current_path }}">
+        <input type="text" name="dirname" placeholder="Folder name" required>
+        <input type="submit" value="Create">
+    </form>
+
+    <h2>Upload File</h2>
+    <form method="POST" action="{{ url_for('explore.upload_file') }}" enctype="multipart/form-data">
+        <input type="hidden" name="current_path" value="{{ current_path }}">
+        <input type="file" name="file">
+        <input type="submit" value="Upload">
+    </form>
+
+    <h2>Folders</h2>
+    <ul>
+        {% for dir, path in dirs %}
+            <li class="dir">
+                📁 <a href="{{ url_for('explore.index', subpath=path) }}">{{ dir }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Files</h2>
+    <ul>
+        {% for file, path in files %}
+            <li class="file">
+                📄 {{ file }}
+                <form style="display:inline;" method="POST" action="{{ url_for('explore.rename') }}">
+                    <input type="hidden" name="current_path" value="{{ current_path }}">
+                    <input type="hidden" name="old_name" value="{{ file }}">
+                    <input type="text" name="new_name" placeholder="New name" required>
+                    <input type="submit" value="Rename">
+                </form>
+                <a href="{{ url_for('explore.index', subpath=path) }}">Download</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
